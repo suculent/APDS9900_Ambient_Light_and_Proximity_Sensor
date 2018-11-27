@@ -35,7 +35,7 @@
 #define FIFO_PAUSE_TIME         30      // Wait period (ms) between FIFO reads
 
 /* APDS-9900 register addresses */
-#define APDS9900_ENABLE         0x00 // not present yet
+#define APDS9900_ENABLE         0x00
 
 #define APDS9900_ATIME          0x01  // ALS integration
 #define APDS9900_PTIME          0x02  // Prox integration time
