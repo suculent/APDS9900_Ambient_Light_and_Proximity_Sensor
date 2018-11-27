@@ -85,15 +85,6 @@
 #define OFF                     0
 #define ON                      1
 
-/* Acceptable parameters for setMode */
-#define POWER                   0
-#define AMBIENT_LIGHT           1
-#define PROXIMITY               2
-#define WAIT                    3
-#define AMBIENT_LIGHT_INT       4
-#define PROXIMITY_INT           5
-#define ALL                     6
-
 /* LED Drive values */
 #define LED_DRIVE_100MA         0
 #define LED_DRIVE_50MA          1
@@ -145,6 +136,18 @@ enum {
   ALL_STATE
 };
 
+
+/* Acceptable parameters for setMode */
+enum apds_mode_t {
+  POWER,
+  AMBIENT_LIGHT,
+  PROXIMITY,
+  WAIT,
+  AMBIENT_LIGHT_INT,
+  PROXIMITY_INT,
+  ALL
+};
+
 /* APDS9900 Class */
 class APDS9900 {
 public:
@@ -154,7 +157,8 @@ public:
     ~APDS9900();
     bool init();
     uint8_t getMode();
-    bool setMode(uint8_t mode, uint8_t enable);
+
+    bool setMode(apds_mode_t mode, uint8_t enable);
 
     /* Turn the APDS-9900 on and off */
     bool enablePower();
@@ -227,7 +231,8 @@ private:
     bool wireWriteDataByte(uint8_t reg, uint8_t val);
     bool wireWriteDataBlock(uint8_t reg, uint8_t *val, unsigned int len);
     bool wireReadDataByte(uint8_t reg, uint8_t &val);
-    int wireReadDataBlock(uint8_t reg, uint8_t *val, unsigned int len);
+    int  wireReadDataBlock(uint8_t reg, uint8_t *val, unsigned int len);
+    bool wireReadDataWord(uint8_t reg, uint16_t &val);
 
 };
 

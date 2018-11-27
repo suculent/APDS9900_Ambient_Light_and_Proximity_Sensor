@@ -142,7 +142,7 @@ uint8_t APDS9900::getMode()
  * @param[in] enable ON (1) or OFF (0)
  * @return True if operation success. False otherwise.
  */
-bool APDS9900::setMode(uint8_t mode, uint8_t enable)
+bool APDS9900::setMode(apds_mode_t mode, uint8_t enable)
 {
     uint8_t reg_val;
 
@@ -349,22 +349,23 @@ bool APDS9900::readAmbientLight(uint16_t &val)
  */
 bool APDS9900::readProximity(uint8_t &val)
 {
-  uint8_t val_byte;
+  uint16_t val_word;
   val = 0;
 
-  /* Read value from clear channel, low byte register */
-  if( !wireReadDataByte(APDS9900_PDATAL, val_byte) ) {
-      Serial.print("APDS9900_PDATAL = "); Serial.println(val_byte);
+  /* Read value, low byte register */
+  if( !wireReadDataWord(APDS9900_PDATAL, val_word) ) {
+      Serial.print("APDS9900_PDATAL = "); Serial.println(val_word);
       return false;
   }
-  val = val_byte;
+  val = val_word;
 
-  /* Read value from clear channel, high byte register */
+  /* Read value, high byte register
   if( !wireReadDataByte(APDS9900_PDATAH, val_byte) ) {
     Serial.print("APDS9900_PDATAH = "); Serial.println(val_byte);
       return false;
   }
   val = val + ((uint16_t)val_byte << 8);
+  */
 
   return true;
 }
@@ -1010,7 +1011,7 @@ bool APDS9900::wireReadDataByte(uint8_t reg, uint8_t &val)
 {
 
     /* Indicate which register we want to read from */
-    if (!wireWriteByte(0x80 | reg)) {
+    if (!wireWriteByte(reg)) { // 0x80 |
         return false;
     }
 
@@ -1021,6 +1022,39 @@ bool APDS9900::wireReadDataByte(uint8_t reg, uint8_t &val)
     }
 
     return true;
+}
+
+/**
+ * @brief Reads a single word from the I2C device and specified register(s)
+ *
+ * @param[in] reg the starting register to read from
+ * @param[out] the value returned from the register
+ * @return True if successful read operation. False otherwise.
+ */
+bool APDS9900::wireReadDataWord(uint8_t reg, uint16_t &val)
+{
+
+  uint8_t input[2] = {0};
+
+  /* Indicate which register we want to read from */
+  if (!wireWriteByte(reg)) {
+      return -1;
+  }
+
+  //uint8_t val_byte = 0;
+  val = 0;
+
+  /* Read block data */
+  Wire.requestFrom(APDS9900_I2C_ADDR, 2);
+  if (Wire.available()) {
+      input[0] = Wire.read();
+      input[1] = Wire.read();
+  }
+
+  val = input[0];
+  val = input[0] + ((uint16_t)input[1] << 8);
+
+  return true;
 }
 
 /**

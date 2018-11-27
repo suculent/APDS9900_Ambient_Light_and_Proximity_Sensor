@@ -4,14 +4,10 @@ APDS-9900 ALS and Proximity Sensor
 Based on code by Shawn Hymel @ SparkFun Electronics
 Maintained by Matej Sychra @ THiNX (github.com/suculent)
 November 27, 2018
-https://github.com/suculent/APDS-9900_ALS_and_Proximity_Sensor
+https://github.com/suculent/APDS9900_Ambient_Light_and_Proximity_Sensor
 
-Tests the ambient light interrupt abilities of the APDS-9900.
-Configures the APDS-9900 over I2C and waits for an external
-interrupt based on high or low light conditions. Try covering
-the sensor with your hand or bringing the sensor close to a
-bright light source. You might need to adjust the LIGHT_INT_HIGH
-and LIGHT_INT_LOW values to get the interrupt to work correctly.
+Tests the ambient light abilities of the APDS-9900.
+Configures the APDS-9900 over I2C and polls the values.
 
 Hardware Connections:
 
@@ -52,13 +48,13 @@ uint16_t ambient_light = 0;
 
 void setup() {
 
-  Wire.begin(D1, D2);
+  Wire.begin(D1, D2); // A4, A5 is default for Arduino
   
   pinMode(LED_PIN, OUTPUT);
   pinMode(APDS9900_INT, INPUT);
   
   // Initialize Serial port
-  Serial.begin(230400); // 9600 baud is default
+  Serial.begin(230400); // 9600 baud is default for Arduino
   Serial.println();
   Serial.println(F("-------------------------------------"));
   Serial.println(F("  APDS-9900 - Ambient Light Sensor   "));
@@ -85,5 +81,5 @@ void loop() {
   apds.readAmbientLight(ambient_light);
   Serial.print("Ambient light: ");
   Serial.println(ambient_light);         
-  delay(200);
+  delay(250);
 }
