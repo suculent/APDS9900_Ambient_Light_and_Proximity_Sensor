@@ -1,0 +1,17 @@
+{
+  "name": "APDS-9000 Ambient Light and Proximity Sensor Library",
+  "keywords": "APDS, 9000, ambient, light, proximity, sensor",
+  "description": "Arduino/ESP8266 driver library for Broadcom APDS-9000.",
+  "authors": {
+    "name": "Matej Sychra",
+    "email": "suculent@me.com",
+    "url": "https://github.com/suculent/APDS9900_Ambient_Light_and_Proximity_Sensor"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/suculent/APDS9900_Ambient_Light_and_Proximity_Sensor.git"
+  },
+  "version": "1.0.0",
+  "frameworks": "arduino",
+  "platforms": "*"
+}
