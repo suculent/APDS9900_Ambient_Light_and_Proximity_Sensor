@@ -1,8 +1,8 @@
 /****************************************************************
-AmbientLightInterrupt.ino
+AmbientLightSensor.ino
 APDS-9900 ALS and Proximity Sensor
-Shawn Hymel @ SparkFun Electronics
-Matej Sychra @ THiNX
+Based on code by Shawn Hymel @ SparkFun Electronics
+Maintained by Matej Sychra @ THiNX (github.com/suculent)
 November 27, 2018
 https://github.com/suculent/APDS-9900_ALS_and_Proximity_Sensor
 
@@ -61,7 +61,7 @@ void setup() {
   Serial.begin(230400); // 9600 baud is default
   Serial.println();
   Serial.println(F("-------------------------------------"));
-  Serial.println(F("APDS-9900 - Ambient Light Sensing    "));
+  Serial.println(F("  APDS-9900 - Ambient Light Sensor   "));
   Serial.println(F("-------------------------------------"));
   
   // Initialize APDS-9900 (configure I2C and initial values)

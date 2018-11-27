@@ -27,69 +27,51 @@
 #define ERROR                   0xFF
 
 /* Acceptable device IDs */
-#define APDS9900_ID_1           0x29
-#define APDS9900_ID_2           0xAB    // reserved, this is actually 9960
+#define APDS9900_ID             0x12    // register
+#define APDS9900_ID_1           0x29    // APDS-9900
+#define APDS9900_ID_2           0x20    // APDS-9901
 
 /* Misc parameters */
 #define FIFO_PAUSE_TIME         30      // Wait period (ms) between FIFO reads
 
 /* APDS-9900 register addresses */
-#define APDS9900_ENABLE         0x80 // not present yet
+#define APDS9900_ENABLE         0x00 // not present yet
 
 #define APDS9900_ATIME          0x01  // ALS integration
 #define APDS9900_PTIME          0x02  // Prox integration time
 #define APDS9900_WTIME          0x03  // Wait time
-#define APDS9900_PPCOUNT        0xE  // pulse count
-#define APDS9900_PCONFIG        0xF  // pulse count
-#define APDS9900_EN             0x0
+
+#define APDS9900_REV            0x11
+#define APDS9900_STATUS         0x13
+#define APDS9900_CDATAL         0x14
+#define APDS9900_CDATAH         0x15
+#define APDS9900_IRDATAL        0x16
+#define APDS9900_IRDATAH        0x17
+#define APDS9900_PDATAH         0x18
+#define APDS9900_PDATAL         0x19
+
+#define APDS9900_AILTL          0x04
+#define APDS9900_AILTH          0x05
+#define APDS9900_AIHTL          0x06
+#define APDS9900_AIHTH          0x07
+
+#define APDS9900_PILTL           0x08
+#define APDS9900_PILTH           0x09
+#define APDS9900_PIHTL           0x0A
+#define APDS9900_PIHTH           0x0B
+
+#define APDS9900_PERS           0x0C
+#define APDS9900_CONFIG1        0x0D
+
+#define APDS9900_CONTROL        0x0F // gain control
+#define APDS9900_PPCOUNT        0x0E  // pulse count = #define APDS9900_PPULSE         0x0E
 
 #define APDS9900_PDRIVE         0x00  // 100 mA
 #define APDS9900_PDIODE         0x20  // CH1 diode
 #define APDS9900_PGAIN          0x00  // Proximity Gain x 1
 #define APDS9900_AGAIN          0x00  // ALS Gain x 1
 
-#define APDS9900_CDATA0         0xA0 | 0x14
-#define APDS9900_CDATA1         0xA0 | 0x16
-#define APDS9900_PDATA          0xA0 | 0x18
 
-/* Rest of those defines needs to be aligned with docs. This is just a placeholder copy from APDS-9960. */
-#define APDS9900_AILTL          0x84
-#define APDS9900_AILTH          0x85
-#define APDS9900_AIHTL          0x86
-#define APDS9900_AIHTH          0x87
-#define APDS9900_PILT           0x89
-#define APDS9900_PIHT           0x8B
-#define APDS9900_PERS           0x8C
-#define APDS9900_CONFIG1        0x8D
-#define APDS9900_PPULSE         0x8E
-#define APDS9900_CONTROL        0x8F
-#define APDS9900_CONFIG2        0x90
-#define APDS9900_ID             0x92
-#define APDS9900_STATUS         0x93
-#define APDS9900_POFFSET_UR     0x9D
-#define APDS9900_POFFSET_DL     0x9E
-#define APDS9900_CONFIG3        0x9F
-#define APDS9900_GPENTH         0xA0
-#define APDS9900_GEXTH          0xA1
-#define APDS9900_GCONF1         0xA2
-#define APDS9900_GCONF2         0xA3
-#define APDS9900_GOFFSET_U      0xA4
-#define APDS9900_GOFFSET_D      0xA5
-#define APDS9900_GOFFSET_L      0xA7
-#define APDS9900_GOFFSET_R      0xA9
-#define APDS9900_GPULSE         0xA6
-#define APDS9900_GCONF3         0xAA
-#define APDS9900_GCONF4         0xAB
-#define APDS9900_GFLVL          0xAE
-#define APDS9900_GSTATUS        0xAF
-#define APDS9900_IFORCE         0xE4
-#define APDS9900_PICLEAR        0xE5
-#define APDS9900_CICLEAR        0xE6
-#define APDS9900_AICLEAR        0xE7
-#define APDS9900_GFIFO_U        0xFC
-#define APDS9900_GFIFO_D        0xFD
-#define APDS9900_GFIFO_L        0xFE
-#define APDS9900_GFIFO_R        0xFF
 
 /* Bit fields */
 #define APDS9900_PON            0b00000001
@@ -98,8 +80,6 @@
 #define APDS9900_WEN            0b00001000
 #define APSD9900_AIEN           0b00010000
 #define APDS9900_PIEN           0b00100000
-#define APDS9900_GEN            0b01000000
-#define APDS9900_GVALID         0b00000001
 
 /* On/Off definitions */
 #define OFF                     0
@@ -142,10 +122,8 @@
 #define DEFAULT_ATIME           0xFF   // or 219     // 103ms
 #define DEFAULT_WTIME           0xFF    // or 246     // 27ms
 #define DEFAULT_PTIME           0xFF    // 2.7 ms – minimum Prox integration time
-#define DEFAULT_PPCOUNT         0x01    // Minimum prox pulse count
+#define DEFAULT_PPCOUNT         0x04    // Minimum prox pulse count
 #define DEFAULT_PROX_PPULSE     0x87    // 16us, 8 pulses
-#define DEFAULT_POFFSET_UR      0       // 0 offset
-#define DEFAULT_POFFSET_DL      0       // 0 offset
 #define DEFAULT_CONFIG1         0x60    // No 12x wait (WTIME) factor
 #define DEFAULT_LDRIVE          LED_DRIVE_100MA
 #define DEFAULT_PGAIN           PGAIN_4X

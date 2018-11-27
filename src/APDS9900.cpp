@@ -71,11 +71,11 @@ bool APDS9900::init()
         return false;
     }
 
-    if( !wireWriteDataByte(0xF, APDS9900_PDRIVE | APDS9900_PDIODE | APDS9900_PGAIN | APDS9900_AGAIN) ) {
-      Serial.println("Setting drive failed.");
+    if( !wireWriteDataByte(APDS9900_CONTROL, APDS9900_PDRIVE | APDS9900_PDIODE | APDS9900_PGAIN | APDS9900_AGAIN) ) {
+      Serial.println("Setting control register failed.");
         return false;
     }
-    if( !wireWriteDataByte(0x0F, APDS9900_WEN | APDS9900_PEN | APDS9900_AEN | APDS9900_PON) ) {
+    if( !wireWriteDataByte(APDS9900_ENABLE, APDS9900_WEN | APDS9900_PEN | APDS9900_AEN | APDS9900_PON) ) {
       Serial.println("Setting ENs failed.");
         return false;
     }
@@ -321,14 +321,14 @@ bool APDS9900::readAmbientLight(uint16_t &val)
     val = 0;
 
     /* Read value from clear channel, low byte register */
-    if( !wireReadDataByte(APDS9900_CDATA0, val_byte) ) {
+    if( !wireReadDataByte(APDS9900_CDATAL, val_byte) ) {
       Serial.print("CH0 = "); Serial.println(val_byte);
         return false;
     }
     val = val_byte;
 
     /* Read value from clear channel, high byte register */
-    if( !wireReadDataByte(APDS9900_CDATA1, val_byte) ) {
+    if( !wireReadDataByte(APDS9900_CDATAH, val_byte) ) {
       Serial.print("CH1 = "); Serial.println(val_byte);
         return false;
     }
@@ -349,14 +349,24 @@ bool APDS9900::readAmbientLight(uint16_t &val)
  */
 bool APDS9900::readProximity(uint8_t &val)
 {
-    val = 0;
+  uint8_t val_byte;
+  val = 0;
 
-    /* Read value from proximity data register */
-    if( !wireReadDataByte(APDS9900_PDATA, val) ) {
-        return false;
-    }
+  /* Read value from clear channel, low byte register */
+  if( !wireReadDataByte(APDS9900_PDATAL, val_byte) ) {
+      Serial.print("APDS9900_PDATAL = "); Serial.println(val_byte);
+      return false;
+  }
+  val = val_byte;
 
-    return true;
+  /* Read value from clear channel, high byte register */
+  if( !wireReadDataByte(APDS9900_PDATAH, val_byte) ) {
+    Serial.print("APDS9900_PDATAH = "); Serial.println(val_byte);
+      return false;
+  }
+  val = val + ((uint16_t)val_byte << 8);
+
+  return true;
 }
 
 
@@ -371,14 +381,24 @@ bool APDS9900::readProximity(uint8_t &val)
  */
 uint8_t APDS9900::getProxIntLowThresh()
 {
-    uint8_t val;
+  uint8_t val_byte;
+  int val = 0;
 
-    /* Read value from PILT register */
-    if( !wireReadDataByte(APDS9900_PILT, val) ) {
-        val = 0;
-    }
+  /* Read value from clear channel, low byte register */
+  if( !wireReadDataByte(APDS9900_PILTL, val_byte) ) {
+      Serial.print("APDS9900_PILTL = "); Serial.println(val_byte);
+      return false;
+  }
+  val = val_byte;
 
-    return val;
+  /* Read value from clear channel, high byte register */
+  if( !wireReadDataByte(APDS9900_PILTH, val_byte) ) {
+    Serial.print("APDS9900_PILTH = "); Serial.println(val_byte);
+      return false;
+  }
+  val = val + ((uint16_t)val_byte << 8);
+
+  return true;
 }
 
 /**
@@ -389,7 +409,7 @@ uint8_t APDS9900::getProxIntLowThresh()
  */
 bool APDS9900::setProxIntLowThresh(uint8_t threshold)
 {
-    if( !wireWriteDataByte(APDS9900_PILT, threshold) ) {
+    if( !wireWriteDataByte(APDS9900_PILTL, threshold) ) {
         return false;
     }
 
@@ -403,14 +423,24 @@ bool APDS9900::setProxIntLowThresh(uint8_t threshold)
  */
 uint8_t APDS9900::getProxIntHighThresh()
 {
-    uint8_t val;
+  uint8_t val_byte;
+  int val = 0;
 
-    /* Read value from PIHT register */
-    if( !wireReadDataByte(APDS9900_PIHT, val) ) {
-        val = 0;
-    }
+  /* Read value from clear channel, low byte register */
+  if( !wireReadDataByte(APDS9900_PIHTL, val_byte) ) {
+      Serial.print("APDS9900_PILTL = "); Serial.println(val_byte);
+      return false;
+  }
+  val = val_byte;
 
-    return val;
+  /* Read value from clear channel, high byte register */
+  if( !wireReadDataByte(APDS9900_PIHTH, val_byte) ) {
+    Serial.print("APDS9900_PILTH = "); Serial.println(val_byte);
+      return false;
+  }
+  val = val + ((uint16_t)val_byte << 8);
+
+  return val;
 }
 
 /**
@@ -421,7 +451,7 @@ uint8_t APDS9900::getProxIntHighThresh()
  */
 bool APDS9900::setProxIntHighThresh(uint8_t threshold)
 {
-    if( !wireWriteDataByte(APDS9900_PIHT, threshold) ) {
+    if( !wireWriteDataByte(APDS9900_PIHTL, threshold) ) {
         return false;
     }
 
@@ -726,14 +756,22 @@ bool APDS9900::setLightIntHighThreshold(uint16_t threshold)
  */
 bool APDS9900::getProximityIntLowThreshold(uint8_t &threshold)
 {
-    threshold = 0;
+  uint8_t val_byte;
+  threshold = 0;
 
-    /* Read value from proximity low threshold register */
-    if( !wireReadDataByte(APDS9900_PILT, threshold) ) {
-        return false;
-    }
+  /* Read value from ambient light high threshold, low byte register */
+  if( !wireReadDataByte(APDS9900_PILTL, val_byte) ) {
+      return false;
+  }
+  threshold = val_byte;
 
-    return true;
+  /* Read value from ambient light high threshold, high byte register */
+  if( !wireReadDataByte(APDS9900_PILTH, val_byte) ) {
+      return false;
+  }
+  threshold = threshold + ((uint16_t)val_byte << 8);
+
+  return true;
 }
 
 /**
@@ -746,7 +784,7 @@ bool APDS9900::setProximityIntLowThreshold(uint8_t threshold)
 {
 
     /* Write threshold value to register */
-    if( !wireWriteDataByte(APDS9900_PILT, threshold) ) {
+    if( !wireWriteDataByte(APDS9900_PILTL, threshold) ) {
         return false;
     }
 
@@ -761,14 +799,22 @@ bool APDS9900::setProximityIntLowThreshold(uint8_t threshold)
  */
 bool APDS9900::getProximityIntHighThreshold(uint8_t &threshold)
 {
-    threshold = 0;
+  uint8_t val_byte;
+  threshold = 0;
 
-    /* Read value from proximity low threshold register */
-    if( !wireReadDataByte(APDS9900_PIHT, threshold) ) {
-        return false;
-    }
+  /* Read value from ambient light high threshold, low byte register */
+  if( !wireReadDataByte(APDS9900_PIHTL, val_byte) ) {
+      return false;
+  }
+  threshold = val_byte;
 
-    return true;
+  /* Read value from ambient light high threshold, high byte register */
+  if( !wireReadDataByte(APDS9900_PIHTH, val_byte) ) {
+      return false;
+  }
+  threshold = threshold + ((uint16_t)val_byte << 8);
+
+  return true;
 }
 
 /**
@@ -781,7 +827,7 @@ bool APDS9900::setProximityIntHighThreshold(uint8_t threshold)
 {
 
     /* Write threshold value to register */
-    if( !wireWriteDataByte(APDS9900_PIHT, threshold) ) {
+    if( !wireWriteDataByte(APDS9900_PIHTL, threshold) ) {
         return false;
     }
 
@@ -886,36 +932,6 @@ bool APDS9900::setProximityIntEnable(uint8_t enable)
     return true;
 }
 
-/**
- * @brief Clears the ambient light interrupt
- *
- * @return True if operation completed successfully. False otherwise.
- */
-bool APDS9900::clearAmbientLightInt()
-{
-    uint8_t throwaway;
-    if( !wireReadDataByte(APDS9900_AICLEAR, throwaway) ) {
-        return false;
-    }
-
-    return true;
-}
-
-/**
- * @brief Clears the proximity interrupt
- *
- * @return True if operation completed successfully. False otherwise.
- */
-bool APDS9900::clearProximityInt()
-{
-    uint8_t throwaway;
-    if( !wireReadDataByte(APDS9900_PICLEAR, throwaway) ) {
-        return false;
-    }
-
-    return true;
-}
-
 
 /*******************************************************************************
  * Raw I2C Reads and Writes
@@ -994,7 +1010,7 @@ bool APDS9900::wireReadDataByte(uint8_t reg, uint8_t &val)
 {
 
     /* Indicate which register we want to read from */
-    if (!wireWriteByte(reg)) {
+    if (!wireWriteByte(0x80 | reg)) {
         return false;
     }
 
