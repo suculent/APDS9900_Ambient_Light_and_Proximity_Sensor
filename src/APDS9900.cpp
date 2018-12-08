@@ -1011,7 +1011,7 @@ bool APDS9900::wireReadDataByte(uint8_t reg, uint8_t &val)
 {
 
     /* Indicate which register we want to read from */
-    if (!wireWriteByte(reg)) { // 0x80 |
+    if (!wireWriteByte(0x80 | reg)) {
         return false;
     }
 

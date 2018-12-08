@@ -139,13 +139,13 @@ enum {
 
 /* Acceptable parameters for setMode */
 enum apds_mode_t {
-  POWER,
-  AMBIENT_LIGHT,
-  PROXIMITY,
-  WAIT,
-  AMBIENT_LIGHT_INT,
-  PROXIMITY_INT,
-  ALL
+  POWER = 0,
+  AMBIENT_LIGHT = 1,
+  PROXIMITY = 2,
+  WAIT = 3,
+  AMBIENT_LIGHT_INT = 4,
+  PROXIMITY_INT = 5,
+  ALL = 6
 };
 
 /* APDS9900 Class */
