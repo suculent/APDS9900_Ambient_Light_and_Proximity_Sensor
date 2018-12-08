@@ -42,14 +42,16 @@ bool APDS9900::init()
 {
     uint8_t id;
 
-    /* Initialize I2C */
-    Wire.begin();
+    /* I2C must be already initialized in order to reuse user configuration. */
+    // Wire.begin();
 
     /* Read ID register and check against known values for APDS-9900 */
     if( !wireReadDataByte(APDS9900_ID, id) ) {
+      Serial.println("wire read failed.");
         return false;
     }
     if( !(id == APDS9900_ID_1 || id == APDS9900_ID_2) ) {
+        Serial.print("ID unknown: "); Serial.println(id);
         return false;
     }
 
@@ -75,12 +77,11 @@ bool APDS9900::init()
       Serial.println("Setting control register failed.");
         return false;
     }
-    if( !wireWriteDataByte(APDS9900_ENABLE, APDS9900_WEN | APDS9900_PEN | APDS9900_AEN | APDS9900_PON) ) {
+    if( !wireWriteDataByte(APDS9900_ENABLE, APDS9900_PIEN | APSD9900_AIEN | APDS9900_WEN | APDS9900_PEN | APDS9900_AEN | APDS9900_PON) ) {
       Serial.println("Setting ENs failed.");
         return false;
     }
 
-    /* extend the minimum viable driver here:
     if( !setLEDDrive(DEFAULT_LDRIVE) ) {
         Serial.println("Setting DEFAULT_LDRIVE failed.");
         return false;
@@ -109,7 +110,6 @@ bool APDS9900::init()
         Serial.println("Setting DEFAULT_AIHT failed.");
         return false;
     }
-    */
 
     return true;
 }
@@ -177,7 +177,7 @@ bool APDS9900::setMode(apds_mode_t mode, uint8_t enable)
 }
 
 /**
- * @brief Starts the light (R/G/B/Ambient) sensor on the APDS-9900
+ * @brief Starts the light (Ambient) sensor on the APDS-9900
  *
  * @param[in] interrupts true to enable hardware interrupt on high or low light
  * @return True if sensor enabled correctly. False on error.
@@ -305,6 +305,36 @@ bool APDS9900::disablePower()
     return true;
 }
 
+/**
+ * @brief Clears the ambient light interrupt
+ *
+ * @return True if operation completed successfully. False otherwise.
+ */
+bool APDS9900::clearAmbientLightInt()
+{
+    uint8_t throwaway;
+    if( !wireReadDataByte(APDS9900_AICLEAR, throwaway) ) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Clears the proximity interrupt
+ *
+ * @return True if operation completed successfully. False otherwise.
+ */
+bool APDS9900::clearProximityInt()
+{
+    uint8_t throwaway;
+    if( !wireReadDataByte(APDS9900_PICLEAR, throwaway) ) {
+        return false;
+    }
+
+    return true;
+}
+
 /*******************************************************************************
  * Ambient light and color sensor controls
  ******************************************************************************/
@@ -347,27 +377,39 @@ bool APDS9900::readAmbientLight(uint16_t &val)
  * @param[out] val value of the proximity sensor.
  * @return True if operation successful. False otherwise.
  */
-bool APDS9900::readProximity(uint8_t &val)
+bool APDS9900::readProximity(uint16_t &val)
 {
-  uint16_t val_word;
+  uint8_t val_byte;
   val = 0;
 
-  /* Read value, low byte register */
-  if( !wireReadDataWord(APDS9900_PDATAL, val_word) ) {
-      Serial.print("APDS9900_PDATAL = "); Serial.println(val_word);
-      return false;
-  }
-  val = val_word;
+  if (wireReadDataWord(APDS9900_PDATAH, val)) {
+    val = val;
+    Serial.print("wireReadDataWord = "); Serial.println(val);
+    return true;
+  };
 
-  /* Read value, high byte register
+/*
+
+  // Read value from clear channel, low byte register
+  if( !wireReadDataByte(APDS9900_PDATAL, val_byte) ) {
+      Serial.print("APDS9900_PDATAL = "); Serial.println(val_byte);
+      return false;
+  } else {
+    Serial.print(val_byte); Serial.print(":");
+  }
+  val = (uint16_t)val_byte;
+
+  // Read value from clear channel, high byte register
   if( !wireReadDataByte(APDS9900_PDATAH, val_byte) ) {
     Serial.print("APDS9900_PDATAH = "); Serial.println(val_byte);
       return false;
+  } else {
+    Serial.println(val_byte);
   }
   val = val + ((uint16_t)val_byte << 8);
-  */
 
   return true;
+  */
 }
 
 
@@ -399,7 +441,7 @@ uint8_t APDS9900::getProxIntLowThresh()
   }
   val = val + ((uint16_t)val_byte << 8);
 
-  return true;
+  return val;
 }
 
 /**
@@ -975,32 +1017,6 @@ bool APDS9900::wireWriteDataByte(uint8_t reg, uint8_t val)
 }
 
 /**
- * @brief Writes a block (array) of bytes to the I2C device and register
- *
- * @param[in] reg the register in the I2C device to write to
- * @param[in] val pointer to the beginning of the data byte array
- * @param[in] len the length (in bytes) of the data to write
- * @return True if successful write operation. False otherwise.
- */
-bool APDS9900::wireWriteDataBlock(  uint8_t reg,
-                                        uint8_t *val,
-                                        unsigned int len)
-{
-    unsigned int i;
-
-    Wire.beginTransmission(APDS9900_I2C_ADDR);
-    Wire.write(reg);
-    for(i = 0; i < len; i++) {
-        Wire.beginTransmission(val[i]);
-    }
-    if( Wire.endTransmission() != 0 ) {
-        return false;
-    }
-
-    return true;
-}
-
-/**
  * @brief Reads a single byte from the I2C device and specified register
  *
  * @param[in] reg the register to read from
@@ -1009,7 +1025,6 @@ bool APDS9900::wireWriteDataBlock(  uint8_t reg,
  */
 bool APDS9900::wireReadDataByte(uint8_t reg, uint8_t &val)
 {
-
     /* Indicate which register we want to read from */
     if (!wireWriteByte(0x80 | reg)) {
         return false;
@@ -1035,56 +1050,42 @@ bool APDS9900::wireReadDataWord(uint8_t reg, uint16_t &val)
 {
 
   uint8_t input[2] = {0};
+  uint8_t index = 0;
 
   /* Indicate which register we want to read from */
-  if (!wireWriteByte(reg)) {
-      return -1;
+  // 0xE0 returns second byte only!
+  // 0xA0 returns nothing (and it should return 2 bytes)
+  if (!wireWriteByte(0xE0 | reg)) {
+      Serial.print("wire.command failed: "); Serial.println("0xE0");
+      return false;
   }
 
-  //uint8_t val_byte = 0;
   val = 0;
 
   /* Read block data */
   Wire.requestFrom(APDS9900_I2C_ADDR, 2);
-  if (Wire.available()) {
-      input[0] = Wire.read();
-      input[1] = Wire.read();
+  while (Wire.available()) {
+      input[index] = Wire.read();
+      ++index;
+      Serial.print("wire.read: "); Serial.print(input[index], HEX); Serial.print(" at index "); Serial.println(index);
   }
 
-  val = input[0];
-  val = input[0] + ((uint16_t)input[1] << 8);
+  if (!wireWriteByte(0xE0 | reg+1)) {
+      Serial.print("wire.command failed: "); Serial.println("0xE0");
+      return false;
+  }
+
+  val = 0;
+
+  /* Read block data */
+  Wire.requestFrom(APDS9900_I2C_ADDR, 2);
+  while (Wire.available()) {
+      input[index] = Wire.read();
+      ++index;
+      Serial.print("wire.read: "); Serial.print(input[index], HEX); Serial.print(" at index "); Serial.println(index);
+  }
+
+  val = (uint16)(input[0] + 256 * input[1]);
 
   return true;
-}
-
-/**
- * @brief Reads a block (array) of bytes from the I2C device and register
- *
- * @param[in] reg the register to read from
- * @param[out] val pointer to the beginning of the data
- * @param[in] len number of bytes to read
- * @return Number of bytes read. -1 on read error.
- */
-int APDS9900::wireReadDataBlock(   uint8_t reg,
-                                        uint8_t *val,
-                                        unsigned int len)
-{
-    unsigned char i = 0;
-
-    /* Indicate which register we want to read from */
-    if (!wireWriteByte(reg)) {
-        return -1;
-    }
-
-    /* Read block data */
-    Wire.requestFrom(APDS9900_I2C_ADDR, len);
-    while (Wire.available()) {
-        if (i >= len) {
-            return -1;
-        }
-        val[i] = Wire.read();
-        i++;
-    }
-
-    return i;
 }

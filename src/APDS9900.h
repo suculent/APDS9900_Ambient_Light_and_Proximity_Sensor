@@ -128,6 +128,10 @@
 #define DEFAULT_CONFIG3         0       // Enable all photodiodes, no SAI
 #define DEFAULT_GLDRIVE         LED_DRIVE_100MA
 
+#define APDS9900_PICLEAR        0xE5
+#define APDS9900_CICLEAR        0xE6
+#define APDS9900_AICLEAR        0xE7
+
 /* State definitions */
 enum {
   NAK_STATE,
@@ -164,15 +168,14 @@ public:
     bool enablePower();
     bool disablePower();
 
+    bool setLEDDrive(uint8_t drive);
+    uint8_t getLEDDrive();
+
     /* Enable or disable specific sensors */
     bool enableLightSensor(bool interrupts = false);
     bool disableLightSensor();
     bool enableProximitySensor(bool interrupts = false);
     bool disableProximitySensor();
-
-    /* LED drive strength control */
-    uint8_t getLEDDrive();
-    bool setLEDDrive(uint8_t drive);
 
     /* Gain control */
     uint8_t getAmbientLightGain();
@@ -206,9 +209,7 @@ public:
     bool readAmbientLight(uint16_t &val);
 
     /* Proximity methods */
-    bool readProximity(uint8_t &val);
-
-private:
+    bool readProximity(uint16_t &val);
 
     /* Proximity Interrupt Threshold */
     uint8_t getProxIntLowThresh();
@@ -216,22 +217,12 @@ private:
     uint8_t getProxIntHighThresh();
     bool setProxIntHighThresh(uint8_t threshold);
 
-    /* LED Boost Control */
-    uint8_t getLEDBoost();
-    bool setLEDBoost(uint8_t boost);
-
-    /* Proximity photodiode select */
-    uint8_t getProxGainCompEnable();
-    bool setProxGainCompEnable(uint8_t enable);
-    uint8_t getProxPhotoMask();
-    bool setProxPhotoMask(uint8_t mask);
+private:
 
     /* Raw I2C Commands */
     bool wireWriteByte(uint8_t val);
     bool wireWriteDataByte(uint8_t reg, uint8_t val);
-    bool wireWriteDataBlock(uint8_t reg, uint8_t *val, unsigned int len);
     bool wireReadDataByte(uint8_t reg, uint8_t &val);
-    int  wireReadDataBlock(uint8_t reg, uint8_t *val, unsigned int len);
     bool wireReadDataWord(uint8_t reg, uint16_t &val);
 
 };
