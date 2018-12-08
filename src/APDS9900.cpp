@@ -43,13 +43,15 @@ bool APDS9900::init()
     uint8_t id;
 
     /* Initialize I2C */
-    Wire.begin();
+    // Wire.begin();
 
     /* Read ID register and check against known values for APDS-9900 */
     if( !wireReadDataByte(APDS9900_ID, id) ) {
+      Serial.println("wire read failed.");
         return false;
     }
     if( !(id == APDS9900_ID_1 || id == APDS9900_ID_2) ) {
+        Serial.print("ID unknown: "); Serial.println(id);
         return false;
     }
 
@@ -177,7 +179,7 @@ bool APDS9900::setMode(apds_mode_t mode, uint8_t enable)
 }
 
 /**
- * @brief Starts the light (R/G/B/Ambient) sensor on the APDS-9900
+ * @brief Starts the light (Ambient) sensor on the APDS-9900
  *
  * @param[in] interrupts true to enable hardware interrupt on high or low light
  * @return True if sensor enabled correctly. False on error.
@@ -349,25 +351,24 @@ bool APDS9900::readAmbientLight(uint16_t &val)
  */
 bool APDS9900::readProximity(uint8_t &val)
 {
-  uint16_t val_word;
+  uint8_t val_byte;
   val = 0;
 
-  /* Read value, low byte register */
-  if( !wireReadDataWord(APDS9900_PDATAL, val_word) ) {
-      Serial.print("APDS9900_PDATAL = "); Serial.println(val_word);
+  /* Read value from clear channel, low byte register */
+  if( !wireReadDataByte(APDS9900_PDATAL, val_byte) ) {
+      Serial.print("APDS9900_PDATAL = "); Serial.println(val_byte);
       return false;
   }
-  val = val_word;
+  val = val_byte;
 
-  /* Read value, high byte register
+  /* Read value from clear channel, high byte register */
   if( !wireReadDataByte(APDS9900_PDATAH, val_byte) ) {
     Serial.print("APDS9900_PDATAH = "); Serial.println(val_byte);
       return false;
   }
   val = val + ((uint16_t)val_byte << 8);
-  */
 
-  return true;
+  return val;
 }
 
 

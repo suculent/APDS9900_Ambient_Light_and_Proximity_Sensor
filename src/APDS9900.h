@@ -29,7 +29,8 @@
 /* Acceptable device IDs */
 #define APDS9900_ID             0x12    // register
 #define APDS9900_ID_1           0x29    // APDS-9900
-#define APDS9900_ID_2           0x20    // APDS-9901
+//#define APDS9900_ID_2           0x20    // APDS-9901
+#define APDS9900_ID_2           18
 
 /* Misc parameters */
 #define FIFO_PAUSE_TIME         30      // Wait period (ms) between FIFO reads
