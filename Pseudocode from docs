@@ -1,0 +1,39 @@
+uint8 ATIME, PIME, WTIME, PPCOUNT;
+ATIME = 0xff; // 2.7 ms – minimum ALS integration time
+WTIME = 0xff; // 2.7 ms – minimum Wait time
+PTIME = 0xff; // 2.7 ms – minimum Prox integration time
+PPCOUNT = 1; // Minimum prox pulse count
+
+WriteRegData(0, 0); //Disable and Powerdown WriteRegData (1, ATIME);
+WriteRegData (2, PTIME);
+WriteRegData (3, WTIME);
+WriteRegData (0xe, PPCOUNT);
+
+uint8 PDRIVE, PDIODE, PGAIN, AGAIN; PDRIVE = 0; //100mA of LED Power PDIODE = 0x20; // CH1 Diode
+PGAIN = 0; //1x Prox gain
+AGAIN = 0; //1x ALS gain
+WriteRegData (0xf, PDRIVE | PDIODE | PGAIN | AGAIN);
+
+uint8 WEN, PEN, AEN, PON;
+WEN = 8; // Enable Wait
+PEN = 4; // Enable Prox
+AEN = 2; // Enable ALS
+PON = 1; // Enable Power On
+WriteRegData (0, WEN | PEN | AEN | PON); // WriteRegData(0,0x0f );
+
+Wait(12); //Wait for 12 ms
+
+int CH0_data, CH1_data, Prox_data;
+
+CH0_data = Read_Word(0x14); CH1_data = Read_Word(0x16); Prox_data = Read_Word(0x18);
+
+WriteRegData(uint8 reg, uint8 data)
+{
+  m_I2CBus.WriteI2C(0x39, 0x80 | reg, 1, &data);
+}
+  uint16 Read_Word(uint8 reg);
+{
+  uint8 barr[2];
+  m_I2CBus.ReadI2C(0x39, 0xA0 | reg, 2, ref barr);
+  return (uint16)(barr[0] + 256 * barr[1]);
+}
