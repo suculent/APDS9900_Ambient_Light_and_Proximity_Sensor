@@ -40,7 +40,7 @@ Distributed as-is; no warranty is given.
 
 // Global Variables
 APDS9900 apds = APDS9900();
-uint8_t proximity_data = 0;
+uint16_t proximity_data = 0;
 
 void setup() {
 
@@ -64,23 +64,49 @@ void setup() {
   if ( !apds.setProximityGain(0) ) {
     Serial.println(F("Something went wrong trying to set PGAIN"));
   }
-  
-  // Start running the APDS-9900 proximity sensor (no interrupts)
+
+  // Start running the APDS-9900 light sensor (no interrupts)
+  if ( apds.enableLightSensor(false) ) {
+    Serial.println(F("Light sensor is now running"));
+  } else {
+    Serial.println(F("Something went wrong during light sensor init!"));
+  }
+
+    // Start running the APDS-9900 proximity sensor (no interrupts)
   if ( apds.enableProximitySensor(false) ) {
     Serial.println(F("Proximity sensor is now running"));
   } else {
-    Serial.println(F("Something went wrong during sensor init!"));
+    Serial.println(F("Something went wrong during proximity sensor init!"));
   }
+
+  apds.setMode(ALL, true);
+  //  apds.setAmbientIntLowThresh(300);
+  //  apds.setAmbientIntHighThresh(500);
+
+  Serial.print("proximity interrupt high thresh "); Serial.println(apds.getProxIntHighThresh());
+  Serial.print("proximity interrupt low thresh "); Serial.println(apds.getProxIntLowThresh());
+  Serial.print("getAmbientLightGain "); Serial.println(apds.getAmbientLightGain());
 }
 
-void loop() {
+uint16_t ambient_light;
+
+void loop() {  
   
   // Read the proximity value
   if ( !apds.readProximity(proximity_data) ) {
     Serial.println("Error reading proximity value");
   } else {
     Serial.print("Proximity: ");
-    Serial.println(proximity_data);
+    Serial.print(proximity_data);
+    Serial.println("d");
+  }
+
+  // Read the proximity value
+  if ( !apds.readAmbientLight(ambient_light) ) {
+    Serial.println("Error reading ambient light value");
+  } else {
+    Serial.print("Ambience: ");
+    Serial.println(ambient_light);
   }
   
   // Wait 250 ms before next reading

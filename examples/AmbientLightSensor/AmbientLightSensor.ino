@@ -65,12 +65,14 @@ void setup() {
     Serial.println(F("APDS-9900 initialization complete"));
   } else {
     Serial.println(F("Something went wrong during APDS-9900 init!"));
+    while(true);
   }
   
   if ( apds.enableLightSensor(false) ) {
     Serial.println(F("Light sensor is now running"));
   } else {
     Serial.println(F("Something went wrong during light sensor init!"));
+    while(true);
   }
   
   // Wait for initialization and calibration to finish

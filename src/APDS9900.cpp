@@ -1053,21 +1053,19 @@ bool APDS9900::wireReadDataWord(uint8_t reg, uint16_t &val)
   uint8_t index = 0;
 
   /* Indicate which register we want to read from */
-  // 0xE0 returns second byte only!
-  // 0xA0 returns nothing (and it should return 2 bytes)
+  // 0xE0 returns one/second byte only!
+  // 0xA0 returns nothing where it should return 2 bytes
   if (!wireWriteByte(0xE0 | reg)) {
       Serial.print("wire.command failed: "); Serial.println("0xE0");
       return false;
   }
-
-  val = 0;
 
   /* Read block data */
   Wire.requestFrom(APDS9900_I2C_ADDR, 2);
   while (Wire.available()) {
       input[index] = Wire.read();
       ++index;
-      Serial.print("wire.read: "); Serial.print(input[index], HEX); Serial.print(" at index "); Serial.println(index);
+      //Serial.print("wire.read: "); Serial.print(input[index], HEX); Serial.print(" at index "); Serial.println(index);
   }
 
   if (!wireWriteByte(0xE0 | reg+1)) {
@@ -1075,14 +1073,12 @@ bool APDS9900::wireReadDataWord(uint8_t reg, uint16_t &val)
       return false;
   }
 
-  val = 0;
-
   /* Read block data */
   Wire.requestFrom(APDS9900_I2C_ADDR, 2);
   while (Wire.available()) {
       input[index] = Wire.read();
       ++index;
-      Serial.print("wire.read: "); Serial.print(input[index], HEX); Serial.print(" at index "); Serial.println(index);
+      //Serial.print("wire.read: "); Serial.print(input[index], HEX); Serial.print(" at index "); Serial.println(index);
   }
 
   val = (uint16)(input[0] + 256 * input[1]);
