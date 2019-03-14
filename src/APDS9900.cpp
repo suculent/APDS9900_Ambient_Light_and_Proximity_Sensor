@@ -1,3 +1,4 @@
+
 /**
  * @file    APDS-9900.cpp
  * @brief   Library for the SparkFun APDS-9900 breakout board
@@ -1081,7 +1082,7 @@ bool APDS9900::wireReadDataWord(uint8_t reg, uint16_t &val)
       //Serial.print("wire.read: "); Serial.print(input[index], HEX); Serial.print(" at index "); Serial.println(index);
   }
 
-  val = (uint16)(input[0] + 256 * input[1]);
+  val = (uint16_t)(input[0] + 256 * input[1]);
 
   return true;
 }
