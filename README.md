@@ -8,7 +8,7 @@ This Arduino Library supports the APDS-9900 Ambient Light & Proximity Sensor sen
 Roadmap
 ---------------
 
-* **TODO:** WARNING: Reading proximity is not a success yet (!).
+* **TODO:** <span style="color:red;">WARNING: Reading proximity is not a success yet (!).</span>
 * In current state of development, the library reads some luminance values, which appear to be mostly correct.
 
 
