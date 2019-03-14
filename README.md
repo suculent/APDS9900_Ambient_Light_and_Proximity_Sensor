@@ -3,14 +3,13 @@ APDS-9900 ALS Sensor Arduino Library
 
 This Arduino Library supports the APDS-9900 Ambient Light & Proximity Sensor sensor family. Forked from SparkFun APDS-9960.
 
-> Work-in-progress with absolutely no warranty. Reason to start this project is, that APDS-9960 driver does not work with APDS-9900/APDS-9901. This is based on the pseudo-code and register listing in Broadcom's APDS-900x documentation.
+> Work-in-progress with absolutely no warranty. Reason to start this project is, that APDS-9960 driver does not work with APDS-9900/APDS-9901. This is based on the pseudo-code and register listing in Broadcom's APDS-99xx documentation.
 
 Roadmap
 ---------------
 
+* **TODO:** WARNING: Reading proximity is not a success yet (!).
 * In current state of development, the library reads some luminance values, which appear to be mostly correct.
-
-* **TODO:** Reading proximity is not a success yet.
 
 
 Getting Started
